@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<title>BitVis</title>
+<script src="js/jquery-1.8.2.min.js"></script>
+<script src="js/d3.v2.min.js"></script>
+
+<link rel="stylesheet" href="css/blueprint/screen.css" type="text/css" media="screen, projection">
+<link rel="stylesheet" href="css/blueprint/print.css" type="text/css" media="print"> 
+<!--[if lt IE 8]>
+  <link rel="stylesheet" href="css/blueprint/ie.css" type="text/css" media="screen, projection">
+<![endif]-->
+
+<link rel="stylesheet" type="text/css" href="css/webbit.css" />
+
+</head>
+<body>
+
+<div id="header">
+  <h1>BitVis</h1>
+</div>
+
+<div id="inputHeader">
+
+  <div class="field">
+  <h2 class="fieldTitle">File</h2>
+  <h3 class="fieldDescrip quiet"><!--(Local)-->&nbsp;</h3>
+  <input type="file" id="files" name="files[]"/>
+  </div>
+  
+  <div class="field">
+  <h2 class="fieldTitle">Width</h2>
+  <h3 class="fieldDescrip quiet">(Bits per row)</h3>
+  <input type="text" class="bitsy" id="widthInput" name="bitwidth" value="8" />
+  </div>
+  
+  <div class="field">
+    <h2 class="fieldTitle">Scale</h2>
+    <h3 class="fieldDescrip quiet">(pixel width/height)</h3>
+    <div id="crossInput">
+      <input type="text" class="bitsy" id="pxInput" name="px" value="15" />
+      x
+      <input type="text" class="bitsy" id="pyInput" name="py" value="15" />
+      <embed id="lock" src="padlock.svg" type="image/svg+xml" /> 
+    </div>
+  </div>
+
+</div>
+
+<div id="viz"></div>
+
+<script type="text/javascript">
+
+var dataset = [], ii;
+var bitwidth = 8, px = 10, py = 10;
+
+function visualizeBytes(d){
+  // Ok, now assuming bits are packed into bytes
+  // Could just "unpack" them for now
+  d2 = [];
+  for(ii=0; ii<d.length; ii++){
+    for(j=7; j>=0; j--){
+      d2.push((d[ii] >> j) & 0x1);
+    }
+  }
+  dataset = d2;
+
+  bitwidth = typeof bitwidth !== 'undefined' ? bitwidth : 8;
+  px = typeof px !== 'undefined' ? px : 20;
+  py = typeof py !== 'undefined' ? py : px;
+
+  d3.select("#viz svg").remove();
+  vis = d3.select('#viz').append("svg:svg").attr('width',600).attr('height',3000);
+
+  //var dataset = [], ii;
+  //for(ii=0; ii<101; ii++){dataset.push(Math.round(Math.random()));}
+
+  //vis = d3.select('#viz svg');
+  
+  // We're going to want to think about this in terms of
+  // inner indices and outer indices
+
+  vis.selectAll('rect').data(dataset).enter().append("rect")
+    .attr('x', function(d,ii) { return (ii % bitwidth)*px; })
+    .attr('y', function(d,ii) { return (Math.floor(ii / bitwidth))*py; })
+    .attr('fill', function(d,ii) { if(d == 0) {return "white";} else {return "black";} })
+    .attr('width',px)
+    .attr('height',py)
+    .attr('id',function(d,ii) {return 'b_' + ii;});
+}
+
+function changeScale(){
+
+    px = typeof px !== 'undefined' ? px : 20;
+    py = typeof py !== 'undefined' ? py : px;
+    
+    d3.select('#viz svg').selectAll('rect')
+      .attr('x', function(d,ii) { return (ii % bitwidth)*px; })
+      .attr('y', function(d,ii) { return (Math.floor(ii / bitwidth))*py; })
+      .attr('width',px)
+      .attr('height',py);
+}
+function visualizeBits(d){
+
+    bitwidth = typeof bitwidth !== 'undefined' ? bitwidth : 8;
+    px = typeof px !== 'undefined' ? px : 20;
+    py = typeof py !== 'undefined' ? py : px;
+
+    d3.select("#viz svg").remove();
+    vis = d3.select('#viz').append("svg:svg").attr('width',600).attr('height',3000);
+
+    var dataset = d;
+    
+    //var dataset = [], ii;
+    //for(ii=0; ii<101; ii++){dataset.push(Math.round(Math.random()));}
+
+    //vis = d3.select('#viz svg');
+    
+    // We're going to want to think about this in terms of
+    // inner indices and outer indices
+
+    vis.selectAll('rect').data(dataset).enter().append("rect")
+      .attr('x', function(d,ii) { return (ii % bitwidth)*px; })
+      .attr('y', function(d,ii) { return (Math.floor(ii / bitwidth))*py; })
+      .attr('fill', function(d,ii) { if(d == 0) {return "white";} else {return "black";} })
+      .attr('width',px)
+      .attr('height',py)
+      .attr('id',function(d,ii) {return 'b_' + ii;});
+}
+
+  function handleFileSelect(evt) {
+    var files = evt.target.files; // FileList object
+
+    var file = files[0];
+
+    var reader = new FileReader();
+
+    reader.onloadend = function(evt){
+      if(evt.target.readyState == FileReader.DONE){
+        var int8View = new Int8Array(evt.target.result);
+        visualizeBytes(int8View);
+      };
+    };
+
+    var blob = file.slice(0,1024*8);
+    reader.readAsArrayBuffer(file);
+  }
+
+  $(document).ready(function(){
+      $('#files').change(handleFileSelect);
+
+      $('#widthInput').val(bitwidth);
+      $('#widthInput').change(function (){
+          bitwidth = $(this).val();
+          bitwidth = typeof bitwidth !== 'undefined' ? bitwidth : 8;
+    
+          d3.select('#viz svg').selectAll('rect')
+            .attr('x', function(d,ii) { return (ii % bitwidth)*px; })
+            .attr('y', function(d,ii) { return (Math.floor(ii / bitwidth))*py; })
+      });
+
+      $('#pxInput').val(px);
+      $('#pxInput').change(function (){
+          px = $(this).val();
+          changeScale(dataset);
+      });
+
+      $('#pyInput').val(py);
+      $('#pyInput').change(function (){
+          py = $(this).val();
+          changeScale(dataset);
+      });
+
+      //$('#lock').click(function (){
+      //  window.alert("clicked lock");
+      //});
+
+  });
+
+  for(ii=0; ii<101; ii++){dataset.push(Math.round(Math.random()));}
+  visualizeBits(dataset);
+</script>
+
+</body>
+</html>

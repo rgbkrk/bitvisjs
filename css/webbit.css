@@ -1,0 +1,86 @@
+/*.bitsy 
+{
+    font-family: Arial, Sans-Serif;
+    font-size: 13px;
+    margin-bottom: 5px;
+    display: block;
+    padding: 4px;
+    border: solid 1px #85b1de;
+    width: 25px;
+}
+
+label.description
+{
+	border:none;
+	color:#222;
+	display:block;
+	font-size:95%;
+	font-weight:700;
+	line-height:150%;
+	padding:0 0 1px;
+	width: 30%;
+	float: left;
+}
+*/
+
+body
+{
+  background-color: #EFEFEF;
+}
+
+#viz{
+  clear:both;
+}
+
+#inputHeader{
+  position:relative;
+  background-color: #DFDFDF;
+}
+
+#header{
+  margin-left: .5em;
+  margin-top: .5em;
+}
+
+div.field
+{
+  float:left;
+  padding: .75em;
+}
+
+.bitsy
+{
+  width: 2em;
+}
+
+.fieldTitle
+{
+  font-family: georgia,garamond,serif;
+  font-size: 1.3em;
+  margin: 0;
+}
+
+.fieldDescrip
+{
+  font-size: 1.1em;
+  font-style: italic;
+  margin: 0;
+}
+
+#lock{
+  margin-left:.5em;
+  vertical-align:middle;
+}
+
+h1 {
+  color: #4f4f4f;
+  font-family: serif;
+  font-size:1.5em;
+  font-weight: bold;
+  /*font-style: italic;*/
+  vertical-align:middle;
+  text-align:center;
+
+}
+
+
